@@ -1,0 +1,51 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model People {
+  id          Int           @id @default(autoincrement())
+  name        String
+  class       Class
+  completions Completions[]
+}
+
+model Tasks {
+  id             Int           @id @default(autoincrement())
+  task           String
+  days           Days
+  completedBy    Completions[] @relation("CompletedTasks")
+  nonCompletedBy Completions[] @relation("NonCompletedTasks")
+}
+
+model Completions {
+  id                Int     @id @default(autoincrement())
+  date              DateTime @default(now())
+  student           People  @relation(fields: [studentId], references: [id])
+  studentId         Int
+  completedTasks    Tasks[] @relation("CompletedTasks")
+  nonCompletedTasks Tasks[] @relation("NonCompletedTasks")
+  image1            String?
+  image2            String?
+  comment           String?
+}
+
+
+enum Class {
+  IM1
+  IM2
+  IT1
+  IT2
+  MP1
+}
+
+enum Days {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+}

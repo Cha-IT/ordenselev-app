@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { sendReport } from './email.js';
+import apiRoutes from './api.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,24 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
-// API Routes
-app.post('/api/submit', async (req, res) => {
-    try {
-        const data = req.body;
-        console.log('Received submission:', data.ordenselev);
-
-        const success = await sendReport(data);
-
-        if (success) {
-            res.status(200).json({ message: 'Rapport sendt' });
-        } else {
-            res.status(500).json({ message: 'Kunne ikke sende e-post' });
-        }
-    } catch (error) {
-        console.error('Server error:', error);
-        res.status(500).json({ message: 'Intern serverfeil' });
-    }
-});
+app.use(apiRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
