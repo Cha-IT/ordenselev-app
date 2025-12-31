@@ -1,24 +1,16 @@
 import { Button, Text, Box, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
-import { tasks } from '../config/tasks';
 
 interface SubmitSectionProps {
-    completedTasks: string[];
+    completedTasksCount: number;
+    totalTasksCount: number;
     images: string[];
     onSubmit: () => Promise<void>;
 }
 
-export const SubmitSection = ({ completedTasks, images, onSubmit }: SubmitSectionProps) => {
+export const SubmitSection = ({ completedTasksCount, totalTasksCount, images, onSubmit }: SubmitSectionProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toast = useToast();
-
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const todaysTasks = tasks.filter(task =>
-        !task.days || task.days.length === 0 || task.days.includes(dayOfWeek)
-    );
-
-    const completedCount = completedTasks.filter(id => todaysTasks.some(t => t.id === id)).length;
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
@@ -60,9 +52,9 @@ export const SubmitSection = ({ completedTasks, images, onSubmit }: SubmitSectio
                     {images.length} {images.length === 1 ? 'bilde' : 'bilder'} vedlagt.
                 </Text>
             )}
-            {completedCount < todaysTasks.length && (
+            {completedTasksCount < totalTasksCount && (
                 <Text fontSize="sm" color="orange.500" mt={2}>
-                    {completedCount} av {todaysTasks.length} oppgaver fullført.
+                    {completedTasksCount} av {totalTasksCount} oppgaver fullført.
                 </Text>
             )}
         </Box>

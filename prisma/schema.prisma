@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model People {
@@ -23,17 +23,17 @@ model Tasks {
 }
 
 model Completions {
-  id                Int     @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
   date              DateTime @default(now())
-  student           People  @relation(fields: [studentId], references: [id])
   studentId         Int
-  completedTasks    Tasks[] @relation("CompletedTasks")
-  nonCompletedTasks Tasks[] @relation("NonCompletedTasks")
   image1            String?
   image2            String?
   comment           String?
+  submission        Boolean  @default(false)
+  student           People   @relation(fields: [studentId], references: [id])
+  completedTasks    Tasks[]  @relation("CompletedTasks")
+  nonCompletedTasks Tasks[]  @relation("NonCompletedTasks")
 }
-
 
 enum Class {
   IM1

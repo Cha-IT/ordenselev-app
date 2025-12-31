@@ -1,10 +1,13 @@
 import { Box, Heading, Text, VStack, Card, CardBody } from '@chakra-ui/react';
-import { getTodaysOrdenselev, getWeekNumber } from '../config/ordenselever';
+import { getWeekNumber } from '../config/ordenselever';
 
-export const Header = () => {
+interface HeaderProps {
+    ordenselev: string;
+}
+
+export const Header = ({ ordenselev }: HeaderProps) => {
     const today = new Date();
     const weekNum = getWeekNumber(today);
-    const ordenselev = getTodaysOrdenselev();
 
     const dayName = today.toLocaleDateString('no-NO', { weekday: 'long' });
     const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
