@@ -1,6 +1,5 @@
 import express from 'express';
-import { db } from './lib/db.js';
-import { Days } from '@prisma/client';
+import { db, Days } from './lib/db.js';
 
 
 const router = express.Router();
@@ -99,7 +98,9 @@ router.get('/api/tasks', async (req, res) => {
 
         const tasks = await db.tasks.findMany({
             where: {
-                days: prismaDay
+                days: {
+                    has: prismaDay
+                }
             }
         });
 
