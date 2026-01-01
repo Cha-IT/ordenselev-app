@@ -1,5 +1,7 @@
 import express from 'express';
 import { db, Days } from './lib/db.js';
+// import { stageDaily } from './lib/dailyStage.js';
+// import { getStudentToday, prepareStudents } from './lib/quickFunctions.js';
 
 
 const router = express.Router();
@@ -236,5 +238,36 @@ router.post('/api/submit', async (req, res) => {
     }
 });
 
+// Temporary code for testing
+/* 
+router.get('/api/test/dailyStage', async (req, res) => {
+    try {
+        const student = await stageDaily();
+        res.json({ student });
+    } catch (error) {
+        console.error('Error fetching student:', error);
+        res.status(500).json({ message: 'Intern serverfeil' });
+    }
+});
+
+router.get('/api/test/getStudentToday', async (req, res) => {
+    try {
+        const student = await getStudentToday();
+        res.json({ student });
+    } catch (error) {
+        console.error('Error fetching student:', error);
+        res.status(500).json({ message: 'Intern serverfeil' });
+    }
+});
+
+router.get('/api/test/prepareStudents', async (req, res) => {
+    try {
+        const student = await prepareStudents();
+        res.json({ student });
+    } catch (error) {
+        console.error('Error fetching student:', error);
+        res.status(500).json({ message: 'Intern serverfeil' });
+    }
+}); */
 
 export default router;

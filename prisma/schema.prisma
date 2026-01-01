@@ -14,10 +14,11 @@ datasource db {
 }
 
 model People {
-  id          Int           @id @default(autoincrement())
-  name        String
-  class       Class
-  completions Completions[]
+  id           Int           @id @default(autoincrement())
+  name         String
+  class        Class
+  completions  Completions[]
+  dailyPersons DailyPerson[]
 }
 
 model Tasks {
@@ -39,6 +40,12 @@ model Completions {
   student           People   @relation(fields: [studentId], references: [id])
   completedTasks    Tasks[]  @relation("CompletedTasks")
   nonCompletedTasks Tasks[]  @relation("NonCompletedTasks")
+}
+
+model DailyPerson {
+  date     DateTime @id
+  personId Int
+  person   People   @relation(fields: [personId], references: [id])
 }
 
 enum Class {

@@ -5,7 +5,7 @@ declare global {
 }
 
 export const db = globalThis.prisma || new PrismaClient();
-export { Days } from "@prisma/client";
+export { Days, Class } from "@prisma/client";
 
 //makes sure we don't create a new connection if one already exists (eg. when hot reloading)
 if (process.env.NODE_ENV !== "production") globalThis.prisma = db;
