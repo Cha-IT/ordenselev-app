@@ -1,7 +1,7 @@
 import express from 'express';
 import { db, Days } from './lib/db.js';
 // import { stageDaily } from './lib/dailyStage.js';
-// import { getStudentToday, prepareStudents } from './lib/quickFunctions.js';
+import { getStudentToday, prepareStudents } from './lib/quickFunctions.js';
 
 
 const router = express.Router();
@@ -147,9 +147,13 @@ router.get('/api/tasks', async (req, res) => {
             };
         });
 
+        // Get name of today's ordenselev
+        const student = await getStudentToday();
+        const ordenselevName = student ? student.name : "Ingen ansvarlig funnet";
+
         res.json({
             tasks: tasksWithStatus,
-            ordenselev: "Ola Nordmann" // Hardcoded for now
+            ordenselev: ordenselevName
         });
     } catch (error) {
         console.error('Fetch tasks error:', error);
@@ -238,6 +242,26 @@ router.post('/api/submit', async (req, res) => {
     }
 });
 
+router.get('/api/daily-person', async (req, res) => {
+    try {
+        const student = await getStudentToday();
+
+        if (!student) {
+            return res.status(404).json({ message: 'Ingen ordenselev funnet for i dag' });
+        }
+
+        res.json({
+            id: student.id,
+            name: student.name,
+            class: student.class
+        });
+    } catch (error) {
+        console.error('Error fetching daily person:', error);
+        res.status(500).json({ message: 'Intern serverfeil' });
+    }
+});
+
+
 // Temporary code for testing
 /* 
 router.get('/api/test/dailyStage', async (req, res) => {
@@ -269,5 +293,6 @@ router.get('/api/test/prepareStudents', async (req, res) => {
         res.status(500).json({ message: 'Intern serverfeil' });
     }
 }); */
+
 
 export default router;

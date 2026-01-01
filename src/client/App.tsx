@@ -14,36 +14,65 @@ interface Task {
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [ordenselev, setOrdenselev] = useState<string>('Laster...');
+  const [studentId, setStudentId] = useState<number | null>(null);
+  const [currentClass, setCurrentClass] = useState<string>('IM1'); // Default fallback
+
   const [completedTaskIds, setCompletedTaskIds] = useState<number[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const currentClass = 'IM1'; // Hardcoded for now, could be in localStorage or a selector
-
   useEffect(() => {
-    const fetchTasks = async () => {
+    const initData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/tasks', {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL;
+        // 1. Fetch daily person info
+        const personRes = await fetch(`${baseUrl}/daily-person`);
+        let fetchedClass = currentClass;
+
+        if (personRes.ok) {
+          const personData = await personRes.json();
+          setOrdenselev(personData.name);
+          setStudentId(personData.id);
+          setCurrentClass(personData.class);
+          fetchedClass = personData.class;
+        } else {
+          setOrdenselev("Ingen ansvarlig funnet");
+        }
+
+        // 2. Fetch tasks for that class (or default)
+        const tasksRes = await fetch(`${baseUrl}/tasks`, {
           headers: {
-            'X-Class': currentClass
+            'X-Class': fetchedClass
           }
         });
-        if (!response.ok) throw new Error('Failed to fetch tasks');
-        const data = await response.json();
-        setTasks(data.tasks);
-        setOrdenselev(data.ordenselev);
+
+        if (!tasksRes.ok) throw new Error('Failed to fetch tasks');
+
+        const tasksData = await tasksRes.json();
+        setTasks(tasksData.tasks);
+
+        // If the daily-person endpoint failed, api/tasks might return a name or "Ingen..."
+        // but we prioritize daily-person if it succeeded. 
+        if (!personRes.ok && tasksData.ordenselev) {
+          setOrdenselev(tasksData.ordenselev);
+        }
+
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        console.error('Error fetching data:', error);
         setOrdenselev('Kunne ikke hente data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTasks();
-  }, [currentClass]);
+    initData();
+  }, []);
 
   const handleSubmit = async () => {
+    if (!studentId) {
+      console.error("No student ID available for submission");
+      // We could show a toast here, but for now we let the backend handle/fail naturally or use fallback
+    }
 
     const payload = {
       completedTaskIds: tasks.filter(t => completedTaskIds.includes(t.id)).map(t => t.id),
@@ -51,11 +80,12 @@ function App() {
       image1: images[0] || null,
       image2: images[1] || null,
       comment: "", // No comment field in UI yet
-      studentId: 1 // Hardcoded for now
+      studentId: studentId // Use state ID
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/submit', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL;
+      const response = await fetch(`${baseUrl}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
