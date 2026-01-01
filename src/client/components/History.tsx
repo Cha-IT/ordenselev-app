@@ -25,11 +25,12 @@ interface Completion {
 export const History = ({ onBack }: { onBack: () => void }) => {
     const [completions, setCompletions] = useState<Completion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
         const fetchCompletions = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/completions');
+                const response = await fetch(`${baseUrl}/completions`);
                 if (!response.ok) throw new Error('Failed to fetch completions');
                 const data = await response.json();
                 setCompletions(data);

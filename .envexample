@@ -1,7 +1,3 @@
-BREVO_API_KEY=
-TEACHER_EMAIL=
-
-
 # This was inserted by `prisma init`:
 # Environment variables declared in this file are NOT automatically loaded by Prisma.
 # Please add `import "dotenv/config";` to your `prisma.config.ts` file, or use the Prisma CLI with Bun
@@ -10,4 +6,10 @@ TEACHER_EMAIL=
 # Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
 # See the documentation for all the connection string options: https://pris.ly/d/connection-strings
 
-DATABASE_URL="file:./dev.db"
+BREVO_API_KEY=...
+TEACHER_EMAIL=example@litecrystal.xyz
+DATABASE_URL="postgresql://user:password@127.0.0.1:5430/databasename"
+
+# Vite Variables: WARNING These may be accessed by the client
+VITE_API_BASE_URL="http://localhost:3000/api"
+VITE_HISTORY_PASSCODE=1234
