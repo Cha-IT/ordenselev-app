@@ -18,13 +18,11 @@ router.get('/api/tasks/all', async (_req, res) => {
 router.get('/api/completions', async (_req, res) => {
     try {
         const completions = await db.completions.findMany({
-            where: {
-                submission: true
-            },
             include: {
                 student: true,
                 completedTasks: true,
                 nonCompletedTasks: true
+                //submission: true
             },
             orderBy: {
                 date: 'desc'
