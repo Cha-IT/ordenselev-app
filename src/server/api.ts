@@ -6,6 +6,7 @@ import { env } from 'process';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
+import { processImage } from './lib/processImage.js';
 
 const router = express.Router();
 
@@ -282,14 +283,28 @@ router.post('/api/upload-images', upload.fields([{ name: 'image1', maxCount: 1 }
 
         // Save Image 1
         if (files['image1'] && files['image1'][0]) {
-            const filePath1 = path.join(dirImage1, `${id}.jpg`);
-            fs.writeFileSync(filePath1, files['image1'][0].buffer);
+            try {
+                const processedBuffer = await processImage(files['image1'][0].buffer);
+                const filePath1 = path.join(dirImage1, `${id}.jpg`);
+                fs.writeFileSync(filePath1, processedBuffer);
+            } catch (err) {
+                console.error(`Failed to process image 1 for completion ${id}`, err);
+                // Continue or fail? Letting it fail for that specific image but continue request? 
+                // Better to throw so client knows something went wrong.
+                throw err;
+            }
         }
 
         // Save Image 2
         if (files['image2'] && files['image2'][0]) {
-            const filePath2 = path.join(dirImage2, `${id}.jpg`);
-            fs.writeFileSync(filePath2, files['image2'][0].buffer);
+            try {
+                const processedBuffer = await processImage(files['image2'][0].buffer);
+                const filePath2 = path.join(dirImage2, `${id}.jpg`);
+                fs.writeFileSync(filePath2, processedBuffer);
+            } catch (err) {
+                console.error(`Failed to process image 2 for completion ${id}`, err);
+                throw err;
+            }
         }
 
         res.status(200).json({ message: 'Bilder lastet opp' });
