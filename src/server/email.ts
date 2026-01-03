@@ -1,7 +1,3 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const TEACHER_EMAIL = process.env.TEACHER_EMAIL || 'teacher@example.com'; // Fallback or from env
 

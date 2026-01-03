@@ -4,7 +4,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRoutes from './api.js';
 import { initCronJobs } from './lib/cron.js';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
