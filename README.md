@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# Ordenselev App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive web application designed to manage and track daily student duties ("ordenselev"). This app facilitates the assignment of students to daily tasks, allows for task completion tracking with image verification, and provides a history view for administrators.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Automated Assignment**: Automatically assigns students to daily duties based on their class schedule and past assignment history ensuring fair distribution.
+- **Daily Checklists**: Provides a checklist of tasks specific to the current day of the week.
+- **Proof of Completion**: Allows students to upload images as proof of task completion.
+- **History Tracking**: Keeps a record of all completed duties, including submitted images and comments.
+- **Admin/Teacher View**: Secure history view to monitor performance over time.
+- **Responsive Design**: Built with Chakra UI for a modern, mobile-friendly interface.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React, Vite, Chakra UI, Framer Motion
+- **Backend**: Node.js, Express
+- **Database**: PostgreSQL with Prisma ORM
+- **Utilities**: `node-cron` for scheduling, `sharp` for image processing
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Before you begin, ensure you have multiple terminals available and the following installed:
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [PostgreSQL](https://www.postgresql.org/)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd ordenselev-app
+    ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3.  **Environment Setup:**
+    Create a `.env` file in the root directory based on `.envexample`.
+    ```bash
+    cp .envexample .env
+    ```
+    Update the `.env` file with your specific configuration:
+    - `DATABASE_URL`: Your PostgreSQL connection string.
+    - `TEACHER_EMAIL`: Email for notifications (if enabled).
+    - `BREVO_API_KEY`: API key for email services (if enabled).
+    - `VITE_API_BASE_URL`: URL for the backend API (default: `http://localhost:3000/api`).
+    - `VITE_HISTORY_PASSCODE`: Passcode for accessing the history page.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+4.  **Database Setup:**
+    Push the schema to your database.
+    ```bash
+    npx prisma db push
+    ```
+    (Optional) Seed the database if a seed script is provided or use Prisma Studio to add initial data.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Running the Application
+
+You need to run both the backend server and the frontend client.
+
+1.  **Start the Backend Server:**
+    ```bash
+    npm run server
+    ```
+    The server typically runs on port 3000.
+
+2.  **Start the Frontend Client:**
+    In a new terminal window:
+    ```bash
+    npm run dev
+    ```
+    The client will typically run on `http://localhost:5173`.
+
+3.  **Manage Database (Optional):**
+    To view and edit database validation records directly:
+    ```bash
+    npx prisma studio
+    ```
+
+## Project Structure
+
+- `src/client`: React frontend application code.
+- `src/server`: Express backend server code.
+- `prisma`: Database schema and migrations.
+- `public`: Static assets.
+
+## Scripts
+
+- `npm run dev`: Start the Vite dev server.
+- `npm run server`: Start the backend Express server.
+- `npm run build`: Build the frontend for production.
+- `npm run lint`: Run ESLint.
