@@ -4,6 +4,8 @@ import { db, Days } from './lib/db.js';
 import { getStudentToday, prepareStudents } from './lib/quickFunctions.js';
 import { compressImageToJPG } from './lib/compressBase64Image.js';
 import { env } from 'process';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
 
@@ -47,23 +49,18 @@ router.get('/api/CompletionImage', async (req, res) => {
             return res.status(400).json({ message: 'Ugyldige parametere' });
         }
 
-        const completion = await db.completions.findUnique({
-            where: { id }
-        });
+        // Determine folder name based on image number
+        const folderName = imgNum === '1' ? 'image1' : 'image2';
 
-        if (!completion) {
-            return res.status(404).json({ message: 'Fant ikke registrering' });
-        }
+        // Construct absolute path to the image
+        // Structure: /_imageStorage/completions/image{1|2}/{id}.jpg
+        const imagePath = path.join(process.cwd(), '_imageStorage', 'completions', folderName, `${id}.jpg`);
 
-        const imageData = imgNum === '1' ? completion.image1 : completion.image2;
-
-        if (!imageData) {
+        if (!fs.existsSync(imagePath)) {
             return res.status(404).json({ message: 'Bilde finnes ikke' });
         }
 
-        // Assuming images are stored as base64 data URLs
-        // If they are just the raw base64, we might need to prepend the prefix
-        res.send(imageData);
+        res.sendFile(imagePath);
     } catch (error) {
         console.error('Image fetch error:', error);
         res.status(500).json({ message: 'Intern serverfeil' });
