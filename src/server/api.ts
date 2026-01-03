@@ -2,7 +2,8 @@ import express from 'express';
 import { db, Days } from './lib/db.js';
 // import { stageDaily } from './lib/dailyStage.js';
 import { getStudentToday, prepareStudents } from './lib/quickFunctions.js';
-
+import { compressImageToJPG } from './lib/compressBase64Image.js';
+import { env } from 'process';
 
 const router = express.Router();
 
@@ -206,8 +207,8 @@ router.post('/api/submit', async (req, res) => {
                     nonCompletedTasks: {
                         set: safeNonCompletedTaskIds.map((id: number) => ({ id }))
                     },
-                    image1: image1 || null,
-                    image2: image2 || null,
+                    image1: image1 ? await compressImageToJPG(image1) : null,
+                    image2: image2 ? await compressImageToJPG(image2) : null,
                     comment: comment || null,
                     submission: true
                 }
@@ -224,8 +225,8 @@ router.post('/api/submit', async (req, res) => {
                     nonCompletedTasks: {
                         connect: safeNonCompletedTaskIds.map((id: number) => ({ id }))
                     },
-                    image1: image1 || null,
-                    image2: image2 || null,
+                    image1: image1 ? await compressImageToJPG(image1) : null,
+                    image2: image2 ? await compressImageToJPG(image2) : null,
                     comment: comment || null,
                     submission: true
                 }
