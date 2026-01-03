@@ -2,10 +2,10 @@ import express from 'express';
 import { db, Days } from './lib/db.js';
 // import { stageDaily } from './lib/dailyStage.js';
 import { getStudentToday, prepareStudents } from './lib/quickFunctions.js';
-import { compressImageToJPG } from './lib/compressBase64Image.js';
 import { env } from 'process';
 import path from 'path';
 import fs from 'fs';
+import multer from 'multer';
 
 const router = express.Router();
 
@@ -159,13 +159,21 @@ router.get('/api/tasks', async (req, res) => {
     }
 });
 
+// Configure multer for memory storage
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    }
+});
+
+
 router.post('/api/submit', async (req, res) => {
     try {
         const {
             completedTaskIds = [],
             nonCompletedTaskIds = [],
-            image1 = null,
-            image2 = null,
+            hasImages = false, // Client tells us if they have images
             comment = "",
             studentId = 1
         } = req.body;
@@ -204,8 +212,7 @@ router.post('/api/submit', async (req, res) => {
                     nonCompletedTasks: {
                         set: safeNonCompletedTaskIds.map((id: number) => ({ id }))
                     },
-                    image1: image1 ? await compressImageToJPG(image1) : null,
-                    image2: image2 ? await compressImageToJPG(image2) : null,
+                    image: hasImages,
                     comment: comment || null,
                     submission: true
                 }
@@ -222,8 +229,7 @@ router.post('/api/submit', async (req, res) => {
                     nonCompletedTasks: {
                         connect: safeNonCompletedTaskIds.map((id: number) => ({ id }))
                     },
-                    image1: image1 ? await compressImageToJPG(image1) : null,
-                    image2: image2 ? await compressImageToJPG(image2) : null,
+                    image: hasImages,
                     comment: comment || null,
                     submission: true
                 }
@@ -232,11 +238,64 @@ router.post('/api/submit', async (req, res) => {
 
         res.status(200).json({
             message: 'Rapport lagret',
-            completionId: completion.id
+            completionId: completion.id,
+            shouldUploadImages: hasImages // Tell client if they should proceed to upload
         });
     } catch (error) {
         console.error('Server error:', error);
         res.status(500).json({ message: 'Intern serverfeil' });
+    }
+});
+
+router.post('/api/upload-images', upload.fields([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }]), async (req, res) => {
+    try {
+        const { completionId } = req.body;
+        // Cast req.files to dictionary of file arrays
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+        if (!completionId) {
+            return res.status(400).json({ message: 'Mangler completionId' });
+        }
+
+        const id = parseInt(completionId as string);
+        if (isNaN(id)) {
+            return res.status(400).json({ message: 'Ugyldig completionId' });
+        }
+
+        // Check if completion exists
+        const completion = await db.completions.findUnique({
+            where: { id: id }
+        });
+
+        if (!completion) {
+            return res.status(404).json({ message: 'Fant ikke rapporten' });
+        }
+
+        // Define base storage path
+        const baseStoragePath = path.join(process.cwd(), '_imageStorage', 'completions');
+        const dirImage1 = path.join(baseStoragePath, 'image1');
+        const dirImage2 = path.join(baseStoragePath, 'image2');
+
+        // Ensure directories exist
+        if (!fs.existsSync(dirImage1)) fs.mkdirSync(dirImage1, { recursive: true });
+        if (!fs.existsSync(dirImage2)) fs.mkdirSync(dirImage2, { recursive: true });
+
+        // Save Image 1
+        if (files['image1'] && files['image1'][0]) {
+            const filePath1 = path.join(dirImage1, `${id}.jpg`);
+            fs.writeFileSync(filePath1, files['image1'][0].buffer);
+        }
+
+        // Save Image 2
+        if (files['image2'] && files['image2'][0]) {
+            const filePath2 = path.join(dirImage2, `${id}.jpg`);
+            fs.writeFileSync(filePath2, files['image2'][0].buffer);
+        }
+
+        res.status(200).json({ message: 'Bilder lastet opp' });
+    } catch (error) {
+        console.error('Image upload error:', error);
+        res.status(500).json({ message: 'Feil ved opplasting av bilder' });
     }
 });
 

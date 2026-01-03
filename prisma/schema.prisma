@@ -33,8 +33,7 @@ model Completions {
   id                Int      @id @default(autoincrement())
   date              DateTime @default(now())
   studentId         Int
-  image1            String?
-  image2            String?
+  image             Boolean  @default(false)
   comment           String?
   submission        Boolean  @default(false)
   student           People   @relation(fields: [studentId], references: [id])
