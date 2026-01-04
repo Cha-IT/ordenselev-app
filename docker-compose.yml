@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: ordenselev_db
+   # ports:
+   #   - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://devuser:devpassword@db:5432/ordenselev_db
+      - PORT=3000
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - TEACHER_EMAIL=${TEACHER_EMAIL}
+      - VITE_HISTORY_PASSCODE=${VITE_HISTORY_PASSCODE}
+      - VITE_API_BASE_URL=/api
+      - SUBMITTED_JPG_QUALITY=${SUBMITTED_JPG_QUALITY}
+    ports:
+      - "80:5173"
+    depends_on:
+      - db
+    command: >
+      sh -c "npm install && 
+             npx prisma generate && 
+             until npx prisma db push; do echo 'Waiting for database...' && sleep 2; done && 
+             npm run server & 
+             npm run dev"
+
+volumes:
+  postgres_data:
