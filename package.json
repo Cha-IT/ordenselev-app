@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npx vite",
     "server": "tsx --tsconfig tsconfig.server.json src/server/index.ts",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && npx vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "npx vite preview"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.10.9",
