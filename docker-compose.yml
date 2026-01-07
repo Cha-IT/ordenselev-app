@@ -29,6 +29,7 @@ services:
       - SUBMITTED_JPG_QUALITY=${SUBMITTED_JPG_QUALITY}
     ports:
       - "80:5173"
+      - "5100:5100"
     depends_on:
       - db
     command: >
@@ -36,12 +37,13 @@ services:
              npx prisma generate && 
              until npx prisma db push; do echo 'Waiting for database...' && sleep 2; done && 
              npm run server & 
-             npm run dev"
+             npm run dev &
+             npx vite --config vite.proxy.config.js"
 
   dbaccess:
     image: timothyjmiller/prisma-studio:latest # A community-maintained image for convenience
-    ports:
-      - "5555:5555"
+    #ports: UNSAFE TO EXPOSE
+    #  - "5555:5555"
     environment:
       POSTGRES_URL: postgresql://devuser:devpassword@db:5432/ordenselev_db
     depends_on:
