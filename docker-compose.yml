@@ -37,17 +37,10 @@ services:
              npx prisma generate && 
              until npx prisma db push; do echo 'Waiting for database...' && sleep 2; done && 
              npm run server & 
-             npm run dev &
+             npm run dev --force &
+             npx prisma studio &
              npx vite --config vite.proxy.config.js"
 
-  dbaccess:
-    image: timothyjmiller/prisma-studio:latest # A community-maintained image for convenience
-    #ports: UNSAFE TO EXPOSE
-    #  - "5555:5555"
-    environment:
-      POSTGRES_URL: postgresql://devuser:devpassword@db:5432/ordenselev_db
-    depends_on:
-      - db
 
 volumes:
   postgres_data:

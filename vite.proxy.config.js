@@ -9,7 +9,7 @@ export default defineConfig({
         port: 5100,
         proxy: {
             '/': {
-                target: 'http://dbaccess:5555',
+                target: 'http://localhost:5555',
                 changeOrigin: true,
                 configure: (proxy, options) => {
                     // Bypass the proxy if the password check fails
