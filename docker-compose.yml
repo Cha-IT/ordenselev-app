@@ -38,5 +38,14 @@ services:
              npm run server & 
              npm run dev"
 
+  dbaccess:
+    image: timothyjmiller/prisma-studio:latest # A community-maintained image for convenience
+    ports:
+      - "5555:5555"
+    environment:
+      POSTGRES_URL: postgresql://devuser:devpassword@db:5432/ordenselev_db
+    depends_on:
+      - db
+
 volumes:
   postgres_data:
