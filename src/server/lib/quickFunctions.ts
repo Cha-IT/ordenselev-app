@@ -177,16 +177,14 @@ export async function stageDaily() {
             return;
         }
 
-        // TODO: Implement logic to find the correct student based on a rotation or schedule
-        // For now, defaulting to ID 1 as seen in other parts of the app
-        const responsibleStudentId = 1;
+        const responsibleStudent = await getStudentToday();
 
         // Create the completion record
         // All tasks start as non-completed
         await db.completions.create({
             data: {
                 date: todayMidnight,
-                studentId: responsibleStudentId,
+                studentId: responsibleStudent.id,
                 submission: false, // Explicitly set to false to indicate not yet submitted
                 nonCompletedTasks: {
                     connect: tasks.map(t => ({ id: t.id }))
