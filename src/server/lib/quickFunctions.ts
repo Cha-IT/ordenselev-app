@@ -1,4 +1,5 @@
 import { db, Days, Class } from './db.js';
+import {sendDailyUpdate} from "./discord.ts";
 
 
 const dayToEnumMap: Record<number, Days> = {
@@ -193,6 +194,7 @@ export async function stageDaily() {
         });
 
         console.log(`Staged daily tasks for ${prismaDay}. Created completion record with ${tasks.length} pending tasks.`);
+        if (process.env.DISCORD_INTEGRATION === "true") {sendDailyUpdate(1);}
 
     } catch (error) {
         console.error('Error staging daily tasks:', error);

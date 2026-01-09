@@ -17,3 +17,14 @@ VITE_PRISMA_PASSWORD=ChangeME!
 # Vite Variables: WARNING These may be accessed by the client
 VITE_API_BASE_URL="http://localhost:3000/api"
 VITE_HISTORY_PASSCODE=1234
+
+# Discord Integration:
+## Set DISCORD_INTEGRATION to true if you want to use discord
+## Webhook 1 is used for sending daily person updates
+## Webhook 2 is used for sending completions to a PRIVATE channel
+
+DISCORD_INTEGRATION="false"
+
+DISCORD_WEBHOOK_URL_1="https://discord.com/api/webhooks/..."
+DISCORD_WEBHOOK_URL_2="https://discord.com/api/webhooks/..."
+DISCORD_WEBHOOK_URL_3="https://discord.com/api/webhooks/..."
