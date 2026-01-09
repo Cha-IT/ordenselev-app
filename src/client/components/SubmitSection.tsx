@@ -4,11 +4,11 @@ import { useState } from 'react';
 interface SubmitSectionProps {
     completedTasksCount: number;
     totalTasksCount: number;
-    images: string[];
+    files: File[];
     onSubmit: () => Promise<void>;
 }
 
-export const SubmitSection = ({ completedTasksCount, totalTasksCount, images, onSubmit }: SubmitSectionProps) => {
+export const SubmitSection = ({ completedTasksCount, totalTasksCount, files, onSubmit }: SubmitSectionProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toast = useToast();
 
@@ -47,9 +47,9 @@ export const SubmitSection = ({ completedTasksCount, totalTasksCount, images, on
             >
                 Send Rapport
             </Button>
-            {images.length > 0 && (
+            {files.length > 0 && (
                 <Text fontSize="sm" color="gray.600" mt={2}>
-                    {images.length} {images.length === 1 ? 'bilde' : 'bilder'} vedlagt.
+                    {files.length} {files.length === 1 ? 'bilde' : 'bilder'} vedlagt.
                 </Text>
             )}
             {completedTasksCount < totalTasksCount && (

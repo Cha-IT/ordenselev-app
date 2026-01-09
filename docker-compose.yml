@@ -1,0 +1,63 @@
+version: '3.8'
+
+x-app-base: &app-base
+  build: .
+  restart: always
+  volumes:
+    - .:/app
+    - /app/node_modules
+  environment: &app-env
+    - DATABASE_URL=postgresql://devuser:devpassword@db:5432/ordenselev_db
+    - PORT=3000
+    - BREVO_API_KEY=${BREVO_API_KEY}
+    - TEACHER_EMAIL=${TEACHER_EMAIL}
+    - VITE_HISTORY_PASSCODE=${VITE_HISTORY_PASSCODE}
+    - VITE_API_BASE_URL=/api
+    - SUBMITTED_JPG_QUALITY=${SUBMITTED_JPG_QUALITY}
+    - VITE_PRISMA_PASSWORD=${VITE_PRISMA_PASSWORD}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: ordenselev_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devuser -d ordenselev_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    <<: *app-base
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "until npx prisma db push --accept-data-loss; do echo 'Waiting for DB push...' && sleep 2; done && npm run server"
+
+  web:
+    <<: *app-base
+    ports:
+      - "80:5173"
+    command: npm run dev -- --host
+
+  prismastudio:
+    <<: *app-base
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5100:5100"
+    command: >
+      sh -c "npx prisma studio --browser none & npx vite --config vite.proxy.config.js"
+
+volumes:
+  postgres_data:
+
+
+

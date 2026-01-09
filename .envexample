@@ -6,10 +6,13 @@
 # Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
 # See the documentation for all the connection string options: https://pris.ly/d/connection-strings
 
+# When using docker for deployment, DATABASE_URL and VITE_API_BASE_URL will be ignored
+
 BREVO_API_KEY=...
 TEACHER_EMAIL=example@litecrystal.xyz
 DATABASE_URL="postgresql://user:password@127.0.0.1:5430/databasename"
 SUBMITTED_JPG_QUALITY=35
+VITE_PRISMA_PASSWORD=ChangeME!
 
 # Vite Variables: WARNING These may be accessed by the client
 VITE_API_BASE_URL="http://localhost:3000/api"

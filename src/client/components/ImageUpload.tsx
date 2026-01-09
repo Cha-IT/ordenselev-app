@@ -1,34 +1,39 @@
 import { Box, Button, Image, SimpleGrid, Text, IconButton } from '@chakra-ui/react';
-import { useRef, type ChangeEvent } from 'react';
+import { useRef, type ChangeEvent, useEffect, useState } from 'react';
 
 interface ImageUploadProps {
-    images: string[];
-    setImages: (images: string[]) => void;
+    files: File[];
+    setFiles: (files: File[]) => void;
 }
 
-export const ImageUpload = ({ images, setImages }: ImageUploadProps) => {
+export const ImageUpload = ({ files, setFiles }: ImageUploadProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
+    const [previews, setPreviews] = useState<string[]>([]);
+
+    useEffect(() => {
+        // Create object URLs for previews
+        const newPreviews = files.map(file => URL.createObjectURL(file));
+        setPreviews(newPreviews);
+
+        // Cleanup function to revoke object URLs
+        return () => {
+            newPreviews.forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [files]);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            if (images.length >= 2) return;
+            if (files.length >= 2) return;
 
             const file = e.target.files[0];
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                setImages([...images, base64String]);
-            };
-
-            reader.readAsDataURL(file);
+            setFiles([...files, file]);
         }
     };
 
     const removeImage = (index: number) => {
-        const newImages = [...images];
-        newImages.splice(index, 1);
-        setImages(newImages);
+        const newFiles = [...files];
+        newFiles.splice(index, 1);
+        setFiles(newFiles);
     };
 
     return (
@@ -39,9 +44,9 @@ export const ImageUpload = ({ images, setImages }: ImageUploadProps) => {
             </Text>
 
             <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} mb={4}>
-                {images.map((img, index) => (
+                {previews.map((preview, index) => (
                     <Box key={index} position="relative" borderRadius="md" overflow="hidden">
-                        <Image src={img} alt={`Opplastet bilde ${index + 1}`} objectFit="cover" h="150px" w="100%" />
+                        <Image src={preview} alt={`Opplastet bilde ${index + 1}`} objectFit="cover" h="150px" w="100%" />
                         <IconButton
                             aria-label="Fjern bilde"
                             icon={<Text fontWeight="bold">X</Text>}
@@ -56,7 +61,7 @@ export const ImageUpload = ({ images, setImages }: ImageUploadProps) => {
                 ))}
             </SimpleGrid>
 
-            {images.length < 2 && (
+            {files.length < 2 && (
                 <>
                     <input
                         type="file"

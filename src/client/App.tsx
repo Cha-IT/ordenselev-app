@@ -18,7 +18,7 @@ function App() {
   const [currentClass, setCurrentClass] = useState<string>('IM1'); // Default fallback
 
   const [completedTaskIds, setCompletedTaskIds] = useState<number[]>([]);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -77,8 +77,7 @@ function App() {
     const payload = {
       completedTaskIds: tasks.filter(t => completedTaskIds.includes(t.id)).map(t => t.id),
       nonCompletedTaskIds: tasks.filter(t => !completedTaskIds.includes(t.id)).map(t => t.id),
-      image1: images[0] || null,
-      image2: images[1] || null,
+      hasImages: images.length > 0,
       comment: "", // No comment field in UI yet
       studentId: studentId // Use state ID
     };
@@ -96,6 +95,25 @@ function App() {
 
       if (!response.ok) {
         throw new Error('Failed to submit');
+      }
+
+      const result = await response.json();
+
+      // Upload images if needed
+      if (result.shouldUploadImages && images.length > 0) {
+        const formData = new FormData();
+        formData.append('completionId', result.completionId.toString());
+        if (images[0]) formData.append('image1', images[0]);
+        if (images[1]) formData.append('image2', images[1]);
+
+        const uploadRes = await fetch(`${baseUrl}/upload-images`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error('Failed to upload images');
+        }
       }
 
       // Reset form after success
@@ -118,13 +136,13 @@ function App() {
           isLoading={isLoading}
         />
         <ImageUpload
-          images={images}
-          setImages={setImages}
+          files={images}
+          setFiles={setImages}
         />
         <SubmitSection
           completedTasksCount={completedTaskIds.length}
           totalTasksCount={tasks.length}
-          images={images}
+          files={images}
           onSubmit={handleSubmit}
         />
       </Container>
