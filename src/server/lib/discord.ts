@@ -14,6 +14,18 @@ const dayToEnumMap: Record<number, Days> = {
 };
 
 /**
+ * Helper to get the ISO week number.
+ */
+function getISOWeek(date: Date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    return weekNo;
+}
+
+/**
  * Helper to send a raw payload to the Discord webhook.
  * Allows selecting between webhook 1, 2, or 3.
  */
@@ -134,6 +146,85 @@ export async function sendDailyUpdate(webhookIndex: 1 | 2 | 3 = 1) {
         await sendDiscordMessage(payload, webhookIndex);
     } catch (error) {
         console.error("Error generating daily update:", error);
+    }
+}
+
+/**
+ * Sends a weekly update with the names of the students responsible for each day of the current week.
+ */
+export async function sendWeeklyUpdate(webhookIndex: 1 | 2 | 3 = 1) {
+    try {
+        const today = new Date();
+        const weekNumber = getISOWeek(today);
+
+        // Find Monday of the current week
+        const day = today.getDay();
+        const monday = new Date(today);
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        monday.setDate(diff);
+        monday.setHours(0, 0, 0, 0);
+
+        const assignments = [];
+        for (let i = 0; i < 5; i++) {
+            const currentDate = new Date(monday);
+            currentDate.setDate(monday.getDate() + i);
+
+            const dayPerson = await db.dailyPerson.findUnique({
+                where: {
+                    date: currentDate
+                },
+                include: {
+                    person: true
+                }
+            });
+
+            const dateStr = currentDate.toLocaleDateString('no-NO', { weekday: 'long' });
+            const capitalizedDay = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+            if (dayPerson && dayPerson.person) {
+                assignments.push(`${capitalizedDay}: **${dayPerson.person.name}** (${dayPerson.person.class})`);
+            } else {
+                assignments.push(`${capitalizedDay}: *Ingen tildelt*`);
+            }
+        }
+
+        const payload = {
+            embeds: [
+                {
+                    title: `🗓️ Ukeplan for uke ${weekNumber}`,
+                    description: "Her er en oversikt over hvem som skal være ordenselever denne uken:",
+                    color: 0x9b59b6, // Purple
+                    fields: [
+                        {
+                            name: "Ukeplan",
+                            value: assignments.join("\n"),
+                            inline: false
+                        }
+                    ],
+                    footer: {
+                        text: "Ordenselev System"
+                    },
+                    timestamp: new Date().toISOString()
+                }
+            ],
+            components: [
+                {
+                    type: 1, // Action Row
+                    components: [
+                        {
+                            type: 2, // Button
+                            style: 5, // Link
+                            label: "Åpne App",
+                            url: APP_URL
+                        }
+                    ]
+                }
+            ]
+        };
+
+        await sendDiscordMessage(payload, webhookIndex);
+    } catch (error) {
+        console.error("Error sending weekly update:", error);
     }
 }
 

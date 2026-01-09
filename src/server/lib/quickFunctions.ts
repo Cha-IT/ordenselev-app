@@ -1,5 +1,5 @@
 import { db, Days, Class } from './db.js';
-import {sendDailyUpdate} from "./discord.ts";
+import { sendDailyUpdate, sendWeeklyUpdate } from "./discord.ts";
 
 
 const dayToEnumMap: Record<number, Days> = {
@@ -86,6 +86,9 @@ export async function prepareStudents() {
             } else {
                 console.warn(`No students found for class ${targetClass} on ${checkDate.toDateString()}`);
             }
+        }
+        if (process.env.DISCORD_INTEGRATION === "true") {
+            await sendWeeklyUpdate(1);
         }
     } catch (error) {
         console.error('Error preparing students:', error);
@@ -180,6 +183,11 @@ export async function stageDaily() {
 
         const responsibleStudent = await getStudentToday();
 
+        if (!responsibleStudent) {
+            console.error('No responsible student found for today, skipping staging.');
+            return;
+        }
+
         // Create the completion record
         // All tasks start as non-completed
         await db.completions.create({
@@ -194,7 +202,7 @@ export async function stageDaily() {
         });
 
         console.log(`Staged daily tasks for ${prismaDay}. Created completion record with ${tasks.length} pending tasks.`);
-        if (process.env.DISCORD_INTEGRATION === "true") {sendDailyUpdate(1);}
+        if (process.env.DISCORD_INTEGRATION === "true") { sendDailyUpdate(1); }
 
     } catch (error) {
         console.error('Error staging daily tasks:', error);
