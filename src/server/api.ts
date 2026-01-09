@@ -2,6 +2,7 @@ import express from 'express';
 import { db, Days } from './lib/db.js';
 // import { stageDaily } from './lib/dailyStage.js';
 import { getStudentToday, prepareStudents } from './lib/quickFunctions.js';
+import { sendCompletion } from './lib/discord.js';
 import { env } from 'process';
 import path from 'path';
 import fs from 'fs';
@@ -237,6 +238,10 @@ router.post('/api/submit', async (req, res) => {
             });
         }
 
+        if (!hasImages && process.env.DISCORD_INTEGRATION === "true") {
+            sendCompletion(completion.id, 2);
+        }
+
         res.status(200).json({
             message: 'Rapport lagret',
             completionId: completion.id,
@@ -305,6 +310,10 @@ router.post('/api/upload-images', upload.fields([{ name: 'image1', maxCount: 1 }
                 console.error(`Failed to process image 2 for completion ${id}`, err);
                 throw err;
             }
+        }
+
+        if (process.env.DISCORD_INTEGRATION === "true") {
+            sendCompletion(id, 2);
         }
 
         res.status(200).json({ message: 'Bilder lastet opp' });

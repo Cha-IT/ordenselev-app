@@ -287,7 +287,7 @@ export async function sendCompletion(completionId: number, webhookIndex: 1 | 2 |
             });
         }
 
-        const payload = {
+        const payload: any = {
             embeds: [
                 {
                     title: title,
@@ -300,6 +300,26 @@ export async function sendCompletion(completionId: number, webhookIndex: 1 | 2 |
                 }
             ]
         };
+
+        // Add images if they exist
+        if (completion.image) {
+            // Discord embeds only support one image directly. 
+            // To show multiple, we can either use multiple embeds or just one main one.
+            // But we can also use "image" property for the primary one.
+            payload.embeds[0].image = {
+                url: `${APP_URL}/api/CompletionImage?id=${completion.id}&img=1`
+            };
+
+            // If there's a second image, we can add a second embed linked to the first one
+            // or just add it as a thumbnail. Let's add a second embed for the second image
+            // to make them both visible in the same message.
+            payload.embeds.push({
+                url: APP_URL, // Common URL to group them
+                image: {
+                    url: `${APP_URL}/api/CompletionImage?id=${completion.id}&img=2`
+                }
+            });
+        }
 
         await sendDiscordMessage(payload, webhookIndex);
     } catch (error) {
