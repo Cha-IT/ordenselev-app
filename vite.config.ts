@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       host: true,
+      allowedHosts: ['domain.com', 'localhost', '127.0.0.1', '0.0.0.0'],
       proxy: {
         '/api': {
           target: 'http://api:3000',
